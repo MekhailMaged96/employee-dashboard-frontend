@@ -1,4 +1,6 @@
-function Input({
+import { forwardRef } from "react";
+
+const Input = forwardRef(function Input({
   label,
   name,
   type = "text",
@@ -8,7 +10,7 @@ function Input({
   error,
   disabled = false,
   required = false,
-}) {
+}, ref) {
   return (
     <div className="flex flex-col gap-1">
       {label && (
@@ -26,6 +28,7 @@ function Input({
         onChange={onChange}
         disabled={disabled}
         required={required}
+        ref={ref}
         className="
           rounded-md
           border
@@ -43,6 +46,6 @@ function Input({
       {error && <span className="text-sm text-red-600">{error}</span>}
     </div>
   );
-}
+});
 
 export default Input;
