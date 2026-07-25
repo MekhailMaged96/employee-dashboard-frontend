@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import api from "../../../services/api";
 import { getEmployees } from "../services/employeeService";
 
 export const useEmployees = () => {

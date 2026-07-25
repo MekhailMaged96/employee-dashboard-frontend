@@ -10,6 +10,7 @@ const Input = forwardRef(function Input({
   error,
   disabled = false,
   required = false,
+  ...rest
 }, ref) {
   return (
     <div className="flex flex-col gap-1">
@@ -29,6 +30,7 @@ const Input = forwardRef(function Input({
         disabled={disabled}
         required={required}
         ref={ref}
+        {...rest}
         className="
           rounded-md
           border

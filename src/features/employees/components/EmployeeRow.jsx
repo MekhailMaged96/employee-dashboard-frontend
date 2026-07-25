@@ -18,19 +18,12 @@ function EmployeeRow({ employee, onEdit, onDelete }) {
         {employee?.department?.name ?? "N/A"}
       </td>
       <td className="px-4 py-3 text-sm text-gray-600">
+        {employee?.salary ?? "N/A"}
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-600">
         {employee?.user?.roles.join(", ")}
       </td>
-      <td className="px-4 py-3">
-        <span
-          className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-            employee.status === "Active"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {employee.status}
-        </span>
-      </td>
+
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <Button
