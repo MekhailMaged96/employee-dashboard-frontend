@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Button from "../../../components/Button/Button";
 import Modal from "../../../components/Modal/Modal";
 import ConfirmDialog from "../../../components/ConfirmDialog/ConfirmDialog";
+import SearchInput from "../../../components/SearchInput/SearchInput";
 import EmployeeTable from "../components/EmployeeTable";
 import EmployeeForm from "../components/EmployeeForm";
 import { useEmployees } from "../hooks/useEmployees";
@@ -10,6 +11,7 @@ import {
   useUpdateEmployee,
   useDeleteEmployee,
 } from "../hooks/useEmployeeMutations";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const EmployeesPage = () => {
   const { data: employees = [], isLoading } = useEmployees();
@@ -20,6 +22,17 @@ const EmployeesPage = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [deletingEmployee, setDeletingEmployee] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
+
+  const filteredEmployees = useMemo(() => {
+    const term = debouncedSearch.trim().toLowerCase();
+    if (!term) return employees;
+    return employees.filter((emp) =>
+      `${emp.name} ${emp.user?.email ?? ""}`.toLowerCase().includes(term)
+    );
+  }, [employees, debouncedSearch]);
 
   const openCreate = () => {
     setEditingEmployee(null);
@@ -64,8 +77,16 @@ const EmployeesPage = () => {
         <Button onClick={openCreate}>Add Employee</Button>
       </div>
 
+      <div className="mb-4 max-w-sm">
+        <SearchInput
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name or email..."
+        />
+      </div>
+
       <EmployeeTable
-        employees={employees}
+        employees={filteredEmployees}
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
