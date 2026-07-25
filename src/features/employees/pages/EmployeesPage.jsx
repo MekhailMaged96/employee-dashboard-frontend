@@ -13,16 +13,20 @@ import {
   useDeleteEmployee,
 } from "../hooks/useEmployeeMutations";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { useEmployeeFiltersStore } from "../store/useEmployeeFiltersStore";
 
 const PAGE_SIZE = 5;
 
 const EmployeesPage = () => {
-  // Spring Page is 0-indexed internally; keep UI 1-indexed and convert at the call site.
-  const [currentPage, setCurrentPage] = useState(1);
+  // Client-only UI state (search term, page) lives in Zustand, outside React tree.
+  const search = useEmployeeFiltersStore((state) => state.search);
+  const currentPage = useEmployeeFiltersStore((state) => state.currentPage);
+  const setSearch = useEmployeeFiltersStore((state) => state.setSearch);
+  const setPage = useEmployeeFiltersStore((state) => state.setPage);
 
-  const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
 
+  // Spring Page is 0-indexed internally; keep UI 1-indexed and convert at the call site.
   const { data, isLoading } = useEmployees(currentPage - 1, PAGE_SIZE);
 
   const employees = data?.content ?? [];
@@ -44,10 +48,7 @@ const EmployeesPage = () => {
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [deletingEmployee, setDeletingEmployee] = useState(null);
 
-  const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-    setCurrentPage(1); // reset to page 1 whenever the search term changes
-  };
+  const handleSearchChange = (e) => setSearch(e.target.value);
 
   const openCreate = () => {
     setEditingEmployee(null);
@@ -110,7 +111,7 @@ const EmployeesPage = () => {
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
-        onPageChange={setCurrentPage}
+        onPageChange={setPage}
       />
 
       <Modal
