@@ -1,17 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { login } from "../services/authService";
+import { useAuth } from "../../../context/AuthContext";
 
 export const useLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login: setAuth } = useAuth();
 
   return useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
+      setAuth(data.token);
       toast.success("Logged in successfully.");
-      navigate("/");
+      const from = location.state?.from?.pathname || "/";
+      navigate(from, { replace: true });
     },
   });
 };

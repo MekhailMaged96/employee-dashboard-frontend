@@ -6,17 +6,20 @@ function EmployeeRow({ employee, onEdit, onDelete }) {
       <td className="px-4 py-3 text-sm text-gray-900">{employee.id}</td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
-            {employee.firstName?.[0]}{employee.lastName?.[0]}
+          <div className="flex h-8 w-50 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
+            {employee.name}
           </div>
-          <span className="text-sm font-medium text-gray-900">
-            {employee.firstName} {employee.lastName}
-          </span>
         </div>
       </td>
-      <td className="px-4 py-3 text-sm text-gray-600">{employee.email}</td>
-      <td className="px-4 py-3 text-sm text-gray-600">{employee.department}</td>
-      <td className="px-4 py-3 text-sm text-gray-600">{employee.role}</td>
+      <td className="px-4 py-3 text-sm text-gray-600">
+        {employee?.user?.email}
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-600">
+        {employee?.department?.name ?? "N/A"}
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-600">
+        {employee?.user?.roles.join(", ")}
+      </td>
       <td className="px-4 py-3">
         <span
           className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
@@ -30,7 +33,11 @@ function EmployeeRow({ employee, onEdit, onDelete }) {
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="secondary" onClick={() => onEdit(employee)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => onEdit(employee)}
+          >
             Edit
           </Button>
           <Button size="sm" variant="danger" onClick={() => onDelete(employee)}>

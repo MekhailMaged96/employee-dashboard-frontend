@@ -5,6 +5,8 @@ import { useEmployees } from "../hooks/useEmployees";
 const EmployeesPage = () => {
   const { data: employees = [], isLoading } = useEmployees();
 
+  console.log("employees", employees);
+
   const handleEdit = (employee) => {
     console.log("edit", employee);
   };
