@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Button from "../../../components/Button/Button";
 import Modal from "../../../components/Modal/Modal";
 import ConfirmDialog from "../../../components/ConfirmDialog/ConfirmDialog";
 import SearchInput from "../../../components/SearchInput/SearchInput";
+import Pagination from "../../../components/Pagination/Pagination";
 import EmployeeTable from "../components/EmployeeTable";
 import EmployeeForm from "../components/EmployeeForm";
 import { useEmployees } from "../hooks/useEmployees";
@@ -13,8 +14,28 @@ import {
 } from "../hooks/useEmployeeMutations";
 import { useDebounce } from "../../../hooks/useDebounce";
 
+const PAGE_SIZE = 5;
+
 const EmployeesPage = () => {
-  const { data: employees = [], isLoading } = useEmployees();
+  // Spring Page is 0-indexed internally; keep UI 1-indexed and convert at the call site.
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
+
+  const { data, isLoading } = useEmployees(currentPage - 1, PAGE_SIZE);
+
+  const employees = data?.content ?? [];
+  const totalPages = data?.totalPages ?? 1;
+
+  const filteredEmployees = debouncedSearch.trim()
+    ? employees.filter((emp) =>
+        `${emp.name} ${emp.user?.email ?? ""}`
+          .toLowerCase()
+          .includes(debouncedSearch.trim().toLowerCase())
+      )
+    : employees;
+
   const createEmployee = useCreateEmployee();
   const updateEmployee = useUpdateEmployee();
   const deleteEmployee = useDeleteEmployee();
@@ -23,16 +44,10 @@ const EmployeesPage = () => {
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [deletingEmployee, setDeletingEmployee] = useState(null);
 
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 400);
-
-  const filteredEmployees = useMemo(() => {
-    const term = debouncedSearch.trim().toLowerCase();
-    if (!term) return employees;
-    return employees.filter((emp) =>
-      `${emp.name} ${emp.user?.email ?? ""}`.toLowerCase().includes(term)
-    );
-  }, [employees, debouncedSearch]);
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setCurrentPage(1); // reset to page 1 whenever the search term changes
+  };
 
   const openCreate = () => {
     setEditingEmployee(null);
@@ -80,7 +95,7 @@ const EmployeesPage = () => {
       <div className="mb-4 max-w-sm">
         <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={handleSearchChange}
           placeholder="Search by name or email..."
         />
       </div>
@@ -90,6 +105,12 @@ const EmployeesPage = () => {
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+      />
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
       />
 
       <Modal
