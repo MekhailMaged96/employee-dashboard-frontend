@@ -1,9 +1,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect } from "react";
 import Input from "../../../components/Input/Input";
+import Select from "../../../components/Select/Select";
 import Button from "../../../components/Button/Button";
+import { useDepartments } from "../../departments/hooks/useDepartments";
 
 const createSchema = z.object({
   name: z.string().min(1, "Name is required."),
@@ -16,11 +17,13 @@ const createSchema = z.object({
 const editSchema = z.object({
   name: z.string().min(1, "Name is required."),
   salary: z.coerce.number().positive("Salary must be greater than 0."),
+  departmentId: z.coerce.number({ invalid_type_error: "Department is required." }),
 });
 
 function EmployeeForm({ employee, onSubmit, isSubmitting, onCancel }) {
   const isEdit = !!employee;
   const schema = isEdit ? editSchema : createSchema;
+  const { data: departments = [] } = useDepartments();
 
   const {
     register,
@@ -29,12 +32,25 @@ function EmployeeForm({ employee, onSubmit, isSubmitting, onCancel }) {
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: isEdit
-      ? { name: employee.name, salary: employee.salary }
+      ? {
+          name: employee.name,
+          salary: employee.salary,
+          departmentId: employee.department?.id ?? "",
+        }
       : { name: "", username: "", email: "", password: "", salary: "" },
   });
 
+  const handleFormSubmit = (data) => {
+    if (isEdit) {
+      const { departmentId, ...rest } = data;
+      onSubmit({ ...rest, department: { id: departmentId } });
+    } else {
+      onSubmit(data);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
       <Input
         label="Name"
         name="name"
@@ -81,13 +97,19 @@ function EmployeeForm({ employee, onSubmit, isSubmitting, onCancel }) {
         {...register("salary")}
       />
 
+      {isEdit && (
+        <Select
+          label="Department"
+          name="departmentId"
+          options={departments}
+          placeholder="Select department"
+          error={errors.departmentId?.message}
+          {...register("departmentId")}
+        />
+      )}
+
       <div className="mt-2 flex justify-end gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
         <Button type="submit" loading={isSubmitting}>

@@ -1,14 +1,18 @@
-function Select({
-  label,
-  name,
-  value,
-  onChange,
-  options = [],
-  placeholder = "Select option",
-  error,
-  disabled = false,
-  required = false,
-}) {
+import { forwardRef } from "react";
+
+const Select = forwardRef(function Select(
+  {
+    label,
+    name,
+    options = [],
+    placeholder = "Select option",
+    error,
+    disabled = false,
+    required = false,
+    ...rest
+  },
+  ref
+) {
   return (
     <div className="flex flex-col gap-1">
       {label && (
@@ -20,10 +24,10 @@ function Select({
       <select
         id={name}
         name={name}
-        value={value}
-        onChange={onChange}
+        ref={ref}
         disabled={disabled}
         required={required}
+        {...rest}
         className="
           rounded-md
           border
@@ -49,6 +53,6 @@ function Select({
       {error && <span className="text-sm text-red-600">{error}</span>}
     </div>
   );
-}
+});
 
 export default Select;
